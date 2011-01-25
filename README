@@ -1,4 +1,4 @@
-some applescripts
+some utilities written in applescript
 text versions in src/
 
 ffctl   - toggle firefox window sort of quake-like. meant to be bound toa global key combo
