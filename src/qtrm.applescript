@@ -1,4 +1,4 @@
--- quake qtrm
+-- quake terminal
 
 -- in order to play well with Spaces we use our own copy of terminal.app
 -- make a copy of Terminal.app in ~/Applications named qtrm.app
@@ -6,22 +6,28 @@
 -- edit Info.plist
 -- change the CFBundleIdentifier string to something else
 -- e.g. io.ix.qtrm
+-- now we have a separate app that we can set to appear in all Spaces.
+
 -- set a trigger in quicksilver to run this script
 
--- doesn't play well with Spaces :(
--- focus only quake window?
--- return focus to last app?
+-- Any preferences set in Terminal.app with have to be set again in the new copy.
+-- after preferences are set you can add:
+-- <key>LSUIElement</key>
+-- <string>1</string>
+-- after <dict> in Info.plist.
+-- This will hide the icon from the dock, and fix focus issues,
+-- but will also disable the menu bar, and keep you from editing Preferences.
 
--- this is our identifier, hopefully unique
-set rect to {0, 22, 1280, 309}
+-- get window width
+-- hardcoding is noticeably faster than running script
+-- set w to word 2 of (do shell script "system_profiler SPDisplaysDataType | grep -w Resolution") as number
+set w to 1280
+set h to 309
 
-tell application "System Events"
-	if (not (exists application process "qtrm")) then
-		set firstrun to true
-	else
-		set firstrun to false
-	end if
-end tell
+-- use the bounds as our window identifier, hopefully it will be unique
+set rect to {0, 22, w, h}
+
+tell application "System Events" to set firstrun to (not (exists application process "qtrm"))
 
 tell application "qtrm"
 	set c to count every window of application "qtrm"
@@ -34,8 +40,11 @@ tell application "qtrm"
 		set found to false
 		repeat with y from 1 to c
 			if bounds of window y is rect then
-				set visible of window y to not visible of window y
 				if visible of window y then
+					set visible of window y to false
+					--tell application "System Events" to keystroke tab using (command down)
+				else
+					set visible of window y to true
 					activate
 				end if
 				set found to true
