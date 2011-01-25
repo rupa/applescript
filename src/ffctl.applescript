@@ -16,7 +16,7 @@ tell application "System Events"
 		-- if there's no open window ( i can't set position or get it to slide in without creating weird unselectable windows. )
 		if (z is 0) then
 			activate application "Firefox"
-			tell process "firefox-bin" to click menu item "Home" of menu "History" of menu bar 1
+			--tell process "firefox-bin" to click menu item "Home" of menu "History" of menu bar 1
 			
 			-- slide out
 		else if (visible of application process "firefox-bin" is true) then
@@ -31,14 +31,18 @@ tell application "System Events"
 			
 			-- slide in             
 		else
-			set x to -scr
-			set position of window 1 of application process "firefox-bin" to {-scr, 23}
+			--set x to -scr
+			--set position of window 1 of application process "firefox-bin" to {-scr, 23}
+			--set visible of application process "firefox-bin" to true
+			--activate application "Firefox"
+			--repeat while x < 0
+			--	set x to x + 64
+			--	set position of window 1 of application process "firefox-bin" to {x, 23}
+			--end repeat
+			
+			set position of window 1 of application process "firefox-bin" to {0, 23}
 			set visible of application process "firefox-bin" to true
 			activate application "Firefox"
-			repeat while x < 0
-				set x to x + 64
-				set position of window 1 of application process "firefox-bin" to {x, 23}
-			end repeat
 			
 		end if
 	end if
