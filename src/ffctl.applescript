@@ -1,7 +1,7 @@
 -- makes firefox slide in from the side of the screen
 -- run as a trigger in quicksilver or butler
 -- works best with only one window
--- v0.03 by 31d1 @cutup.org
+-- v0.04 by rupa@lrrr.us
 
 tell application "System Events"
 	
