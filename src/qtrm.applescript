@@ -1,5 +1,12 @@
--- quake terminal
--- set a trigger in quicksilver to run this
+-- quake qtrm
+
+-- in order to play well with Spaces we use our own copy of terminal.app
+-- make a copy of Terminal.app in ~/Applications named qtrm.app
+-- right click -> show package contents
+-- edit Info.plist
+-- change the CFBundleIdentifier string to something else
+-- e.g. io.ix.qtrm
+-- set a trigger in quicksilver to run this script
 
 -- doesn't play well with Spaces :(
 -- focus only quake window?
@@ -9,18 +16,18 @@
 set rect to {0, 22, 1280, 309}
 
 tell application "System Events"
-	if (not (exists application process "Terminal")) then
+	if (not (exists application process "qtrm")) then
 		set firstrun to true
 	else
 		set firstrun to false
 	end if
 end tell
 
-tell application "Terminal"
-	set c to count every window of application "Terminal"
+tell application "qtrm"
+	set c to count every window of application "qtrm"
 	if c = 0 then
 		do script
-		set x to front window of application "Terminal"
+		set x to front window of application "qtrm"
 		set bounds of x to rect
 		activate
 	else
@@ -39,7 +46,7 @@ tell application "Terminal"
 			if not firstrun then
 				do script
 			end if
-			set x to front window of application "Terminal"
+			set x to front window of application "qtrm"
 			set bounds of x to rect
 			activate
 		end if
