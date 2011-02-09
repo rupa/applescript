@@ -1,30 +1,31 @@
 -- quicksilver plugin for moving the active window around in a grid
--- Place script in ~/Library/Application Support/Quicksilver/Actions
--- set triggers for "left", "right", "top", "bottom", and full
 --
--- the grid looks like:
+-- Place script in ~/Library/Application Support/Quicksilver/Actions
+-- Set triggers for each direction:
+--  "left", "right", "top", "bottom", and "full"
+-- (I use ctrl-option-arrows)
+-- There are also triggers for moving windows by 10 pixel steps:
+-- set triggers for "p left", "p right", "p top", and "p bottom"
+-- (I use ctrl-option-cmd-arrows)
+--
+-- The grid looks like:
 --
 -- 1 2 3
 -- 4 5 6
 -- 7 8 9
 --
--- where 5 is "full", 
--- 2, 8, 4 and 6 are "top", "bottom", "left" and "right"
+-- where 5 is "full", 2, 8, 4 and 6 are "top", "bottom", "left" and "right"
 -- and 1, 3, 7 and 9 are the corners.
 --
--- Get to corners with combinations.
+-- Get to corners with combinations:
 -- For example, get to 3 by going "top" from 4 or "left" from 2
 --
--- Some windows, notably terminal windows don't play well with resizing,
+-- Some windows - notably terminal windows - don't play well with resizing,
 -- so a level of fuzziness is built in for windows that are not exactly the position
--- or size we expect.
+-- or size we expect, and commands are provided for fine adjustment.
 
 on grid(pos, direction)
 	-- grid motion (pos * dir -> pos)
-	
-	-- 1 2 3
-	-- 4 5 6
-	-- 7 8 9
 	
 	--   1 2 3 4 5 6 7 8 9
 	-- u 2 2 2 1 2 3 4 2 6
@@ -53,7 +54,6 @@ end cmp
 
 on pos_size(pos)
 	-- get bounds: pos -> position, size
-	
 	set menubar to 22
 	tell application "Finder"
 		set b to bounds of window of desktop
@@ -61,19 +61,24 @@ on pos_size(pos)
 		set y to item 4 of b
 	end tell
 	
-	set a to {{0, menubar}, {x / 2, (y + menubar) / 2}}
-	set b to {{0, menubar}, {x, (y + menubar) / 2}}
-	set c to {{x / 2, menubar}, {x / 2, (y + menubar) / 2}}
+	-- a b c
+	-- d e f
+	-- g h i
+	
+	set a to {{0, menubar}, {x / 2, (y - menubar) / 2}}
+	set b to {{0, menubar}, {x, (y - menubar) / 2}}
+	set c to {{x / 2, menubar}, {x / 2, (y - menubar) / 2}}
 	set d to {{0, menubar}, {x / 2, y - menubar}}
 	set e to {{0, menubar}, {x, y - menubar}}
 	set f to {{x / 2, menubar}, {x / 2, y - menubar}}
-	set g to {{0, (y + menubar) / 2}, {x / 2, (y + menubar) / 2}}
-	set h to {{0, (y + menubar) / 2}, {x, (y + menubar) / 2}}
-	set i to {{x / 2, (y + menubar) / 2}, {x / 2, (y + menubar) / 2}}
+	set g to {{0, (y + menubar) / 2}, {x / 2, (y - menubar) / 2}}
+	set h to {{0, (y + menubar) / 2}, {x, (y - menubar) / 2}}
+	set i to {{x / 2, (y + menubar) / 2}, {x / 2, (y - menubar) / 2}}
 	return item pos of {a, b, c, d, e, f, g, h, i}
 end pos_size
 
 on startpos(pos, sz)
+	-- decide where we are in the grid, with some fuzziness
 	if cmp(get item 1 of pos_size(1), pos) then
 		if cmp(get item 2 of pos_size(1), sz) then
 			return 1
@@ -103,6 +108,22 @@ on startpos(pos, sz)
 	end if
 end startpos
 
+on pxmv(p, direction)
+	-- step_size is in pixels
+	set step_size to 10
+	if direction = "right" then
+		return {(item 1 of p) + step_size, item 2 of p}
+	else if direction = "left" then
+		return {(item 1 of p) - step_size, item 2 of p}
+	else if direction = "bottom" then
+		return {item 1 of p, (item 2 of p) + step_size}
+	else if direction = "top" then
+		return {item 1 of p, (item 2 of p) - step_size}
+	else
+		return p
+	end if
+end pxmv
+
 using terms from application "Quicksilver"
 	on process text direction
 		tell application "System Events"
@@ -110,14 +131,18 @@ using terms from application "Quicksilver"
 			-- get window
 			repeat with i from 1 to count of every process
 				if frontmost of process i then
+					set w to window 1 of process i
 					exit repeat
 				end if
 			end repeat
 			
-			set w to window 1 of process i
-			set s to my pos_size(my grid(my startpos(position of w, size of w), direction))
-			set position of w to item 1 of s
-			set size of w to item 2 of s
+			if word 1 of direction = "p" and (count words of direction) = 2 then
+				set position of w to my pxmv(position of w, word 2 of direction)
+			else
+				set s to my pos_size(my grid(my startpos(position of w, size of w), direction))
+				set position of w to item 1 of s
+				set size of w to item 2 of s
+			end if
 			
 		end tell
 	end process text
